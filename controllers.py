@@ -1,59 +1,61 @@
 from sys import exit
 from configurations import Config
 from phonebook import PhoneBook
-from views import Printer, Subscriber
+from views import MessagePrinter, Subscriber
 from serialize import Serialize
 
 
 class Controller:
-    subscriber = Subscriber()
-    printer = Printer()
+    subscriber_view = Subscriber()
+    message_printer = MessagePrinter()
+    database = PhoneBook.get_object()
 
     def __init__(self):
         config = Config()
         serializer = Serialize(config.get_setting('Serialize', 'serialize'))
-        PhoneBook.get_object().set_serializer(serializer)
-        PhoneBook.get_object().load_database()
+        self.database.set_serializer(serializer)
+        self.database.load_database()
 
     def add_new_subscriber(self):
-        sub, num = self.subscriber.enter_new_subscriber_and_phone_number()
-        found = PhoneBook.get_object().find_subscriber('subscriber', sub)
-        if found is not None:
-            found = PhoneBook.get_object().find_subscriber('phone', num)
-            if found is not None:
-                self.printer.print_result_of_adding(-1)
-                return
-        self.printer.print_result_of_adding(
-            PhoneBook.get_object().add_new_subscriber(sub, num))
+        sub, num = \
+            self.subscriber_view.enter_new_subscriber_and_phone_number()
+        if self.database.find_subscriber('subscriber', sub) is None or \
+           self.database.find_subscriber('phone', num) is None:
+            self.message_printer.print_result_of_adding(-1)
+            return
+        self.message_printer.print_result_of_adding(
+            self.database.add_new_subscriber(sub, num))
 
     def get_all_subscribers(self):
-        self.subscriber.out_subscribers_and_their_phone_numbers(
-            PhoneBook.get_object().get_all_subscribers_with_phone_numbers())
+        self.subscriber_view.out_subscribers_and_their_phone_numbers(
+            self.database.get_all_subscribers_with_phone_numbers())
 
     def find_subscriber(self, key):
-        value = self.subscriber.enter_subscribers_data(key)
-        self.subscriber.out_subscribers_and_their_phone_numbers([
-            PhoneBook.get_object().find_subscriber(key, value)])
+        value = self.subscriber_view.enter_subscribers_data(key)
+        self.subscriber_view.out_subscribers_and_their_phone_numbers([
+            self.database.find_subscriber(key, value)])
 
     def update_subscriber(self, key):
-        sub = PhoneBook.get_object().find_subscriber(
-            key, self.subscriber.enter_subscribers_data(key))
+        sub = self.database.find_subscriber(
+            key, self.subscriber_view.enter_subscribers_data(key))
         res = -1
         if sub is not None:
-            inv_key = 'subscriber' if key == 'phone' else 'phone'
-            val = self.subscriber.enter_subscribers_data(key)
-            res = PhoneBook.get_object().update_subscriber(inv_key, sub, val)
-            self.subscriber.out_subscribers_and_their_phone_numbers([
-                PhoneBook.get_object().find_subscriber(key, val)])
-        self.printer.print_result_of_updating(res)
+            val = self.subscriber_view.enter_subscribers_data(key)
+            res = self.database.update_subscriber(key, sub, val)
+            self.subscriber_view.out_subscribers_and_their_phone_numbers([
+                self.database.find_subscriber(key, val)])
+        self.message_printer.print_result_of_updating(res)
 
     def delete_subscriber(self):
-        value = self.subscriber.enter_subscribers_data('subscriber')
-        self.printer.print_result_of_deleting(
-            PhoneBook.get_object().remove_subscriber('subscriber', value))
-        self.subscriber.out_subscribers_and_their_phone_numbers(
-            PhoneBook.get_object().get_all_subscribers_with_phone_numbers())
+        value = self.subscriber_view.enter_subscribers_data('subscriber')
+        self.message_printer.print_result_of_deleting(
+            self.database.remove_subscriber('subscriber', value))
+        self.subscriber_view.out_subscribers_and_their_phone_numbers(
+            self.database.get_all_subscribers_with_phone_numbers())
+
+    def error_operation(self):
+        self.message_printer.print_message_of_error_entering_data()
 
     def save_and_exit(self):
-        PhoneBook.get_object().save_database()
+        self.database.save_database()
         exit()

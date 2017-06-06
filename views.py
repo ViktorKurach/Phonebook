@@ -2,48 +2,48 @@ class Menu:
     _menu = [
 
         {
-            "id": "1",
-            "command": "Get subscribers",
-            "action": "get_all_subscribers"
+            'id': '1',
+            'command': 'Get subscribers',
+            'action': 'get_all_subscribers'
         },
         {
-            "id": "2",
-            "command": "Add new subscriber",
-            "action": "add_new_subscriber"
+            'id': '2',
+            'command': 'Add new subscriber',
+            'action': 'add_new_subscriber'
         },
         {
-            "id": "3",
-            "command": "Find subscriber by name",
-            "action": "find_subscriber",
-            "key": "subscriber"
+            'id': '3',
+            'command': 'Find subscriber by name',
+            'action': 'find_subscriber',
+            'key': 'subscriber'
         },
         {
-            "id": "4",
-            "command": "Find subscriber by phone",
-            "action": "find_subscriber",
-            "key": "phone"
+            'id': '4',
+            'command': 'Find subscriber by phone',
+            'action': 'find_subscriber',
+            'key': 'phone'
         },
         {
-            "id": "5",
-            "command": "Update subscriber's name",
-            "action": "update_subscriber",
-            "key": "subscriber"
+            'id': '5',
+            'command': 'Update subscriber\'s name',
+            'action': 'update_subscriber',
+            'key': 'subscriber'
         },
         {
-            "id": "6",
-            "command": "Update subscriber's phone",
-            "action": "update_subscriber",
-            "key": "phone"
+            'id': '6',
+            'command': 'Update subscriber\'s phone',
+            'action': 'update_subscriber',
+            'key': 'phone'
         },
         {
-            "id": "7",
-            "command": "Remove subscriber by name",
-            "action": "delete_subscriber"
+            'id': '7',
+            'command': 'Remove subscriber by name',
+            'action': 'delete_subscriber'
         },
         {
-            "id": "8",
-            "command": "Exit",
-            "action": "save_and_exit"
+            'id': '8',
+            'command': 'Exit',
+            'action': 'save_and_exit'
         }
 
     ]
@@ -68,14 +68,14 @@ class Menu:
         print Menu of program
         """
         for item in self._menu:
-            print(item["id"] + ") " + item["command"])
+            print(item['id'] + ') ' + item['command'])
 
     def get_item(self, command):
         """
         returns dict from _menu with command id, command title,
         controller and action by id
         """
-        return next(item for item in self._menu if item["id"] == str(command))
+        return next(item for item in self._menu if item['id'] == str(command))
 
 
 class Subscriber:
@@ -84,20 +84,20 @@ class Subscriber:
         read new subscriber's name from Console.
         Return name
         """
-        sub = input("Enter subscriber\'s name:\n> ")
-        if len(sub) == 0:
-            return self.enter_subscriber()
-        return sub
+        name = input('Enter subscriber\'s name:\n> ')
+        if len(name) <= 3:
+            raise ValueError()
+        return name
 
     def enter_phone_number(self):
         """
         read new subscriber's phone number from Console.
         Return phone number
         """
-        number = input("Enter phone number\'s name:\n> ")
-        if len(number) == 0:
-            return self.enter_phone_number()
-        return number
+        phone = input('Enter phone number:\n> ')
+        if len(phone) <= 5:
+            raise ValueError()
+        return phone
 
     def enter_new_subscriber_and_phone_number(self):
         """
@@ -113,12 +113,12 @@ class Subscriber:
         ...
         """
         if len(subscribers) == 0 or subscribers == [None]:
-            print("\nDatabase is empty")
+            print('\nDatabase is empty or subscriber not found')
             return
-        print("")
+        print('')
         for sub in subscribers:
-            print("Name: " + sub["subscriber"] + "\nPhone: " + sub["phone"] + "\n")
-        input("Press any key to continue\n")
+            print('Name: %s\nPhone: %s\n' % (sub['subscriber'], sub['phone']))
+        input('Press any key to continue\n')
 
     def enter_subscribers_data(self, key):
         """
@@ -132,15 +132,18 @@ class Subscriber:
         return value
 
 
-class Printer:
+class MessagePrinter:
+    def print_message_of_error_entering_data(self):
+        print('Error with entering data of subscriber')
+
     def print_result_of_adding(self, index):
         """
         print message result of adding
         """
         self.print_message(
             index,
-            "Subscriber successfully added",
-            "Subscriber already exists")
+            'Subscriber successfully added',
+            'Error with adding subscriber')
 
     def print_result_of_updating(self, index):
         """
@@ -148,8 +151,8 @@ class Printer:
         """
         self.print_message(
             index,
-            "Subscriber successfully updated",
-            "Subscriber error while updating")
+            'Subscriber successfully updated',
+            'Error while updating subscriber')
 
     def print_result_of_deleting(self, index):
         """
@@ -157,8 +160,8 @@ class Printer:
         """
         self.print_message(
             index,
-            "Subscriber successfully deleted",
-            "Subscriber error while deleting")
+            'Subscriber successfully deleted',
+            'Error while deleting subscriber')
 
     def print_message(self, index, message1, message2):
         """

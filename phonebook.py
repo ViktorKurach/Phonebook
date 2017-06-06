@@ -1,3 +1,6 @@
+from collections import Iterator
+
+
 class PhoneBook(object):
     """
     database for subscribers and phone numbers. Realize pattern singleton
@@ -6,6 +9,12 @@ class PhoneBook(object):
 
     _obj = None
     _serialize = None
+
+    def __iter__(self):
+        """
+        method for supporting iterator pattern        
+        """
+        return PhoneBookIterator(self)
 
     def set_serializer(self, serializer):
         """
@@ -50,8 +59,8 @@ class PhoneBook(object):
         if not self.remove_subscriber(key, old_subscriber[key]):
             return -1
         if key == 'subscriber':
-            return self.add_new_subscriber(old_subscriber[key], new_value)
-        return self.add_new_subscriber(new_value, old_subscriber[key])
+            return self.add_new_subscriber(new_value, old_subscriber['phone'])
+        return self.add_new_subscriber(old_subscriber['subscriber'], new_value)
 
     def remove_subscriber(self, key, value):
         """
@@ -74,3 +83,23 @@ class PhoneBook(object):
         deserialize database with selected serializer, place it in _phonebook
         """
         self._phonebook = self._serialize.load('phonebook')
+
+
+class PhoneBookIterator(Iterator):
+    """
+    class release pattern iterator for PhoneBook
+    """
+
+    phonebook = None
+    last_index = 0
+    index = 0
+
+    def __init__(self, phonebook):
+        self.phonebook = phonebook.get_all_subscribers_with_phone_numbers()
+        self.last_index = len(self.phonebook)
+
+    def __next__(self):
+        if self.index == self.last_index:
+            raise StopIteration
+        self.index += 1
+        return self.phonebook[self.index - 1]
